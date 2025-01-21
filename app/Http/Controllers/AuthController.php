@@ -27,7 +27,7 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-
+        $this->generate2FA();
         return response()->json(['token' => $token, 'user' => $user], 200);
     }
 
@@ -97,6 +97,55 @@ class AuthController extends Controller
           $user->token()->revoke();
           return response()->json(['message' => 'Successfully logged out'], 200);
       }
+
+      public function generate2FA(Request $request)
+    {
+
+        $user = Auth::user();
+
+        // Generate a random 6-digit code
+        $code = rand(100000, 999999);
+
+        $user->update([
+            'two_factor_code' => $code,
+            'two_factor_expires_at' => Carbon::now()->addMinutes(10),
+        ]);
+
+        // Send the code via email
+        $user->notify(new TwoFactorCodeNotification($code));
+
+        return response()->json(['message' => '2FA code sent to your email.'], 200);
+    }
+
+    public function verify2FA(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'code' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || $user->two_factor_code !== $request->code) {
+            return response()->json(['message' => 'Invalid 2FA code.'], 400);
+        }
+
+        if (Carbon::now()->greaterThan($user->two_factor_expires_at)) {
+            return response()->json(['message' => 'The 2FA code has expired.'], 400);
+        }
+
+        // Invalidate the code after verification
+        $user->update([
+            'two_factor_code' => null,
+            'two_factor_expires_at' => null,
+        ]);
+
+        return response()->json(['message' => '2FA code verified successfully.'], 200);
+    }
 
 }
 

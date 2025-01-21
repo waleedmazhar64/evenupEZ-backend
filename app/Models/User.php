@@ -30,7 +30,8 @@ class User extends Authenticatable
         'sms_notification',
         'push_notification',
         'notification_frequency',
-        'role'
+        'role',
+        'two_factor_code', 'two_factor_expires_at',
     ];
 
     /**
