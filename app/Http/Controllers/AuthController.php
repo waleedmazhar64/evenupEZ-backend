@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Notifications\ForgetPassword;
+use App\Notifications\TwoFactorCode;
 
 class AuthController extends Controller
 {
@@ -27,7 +28,17 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-        $this->generate2FA();
+        
+        $code = rand(100000, 999999);
+
+        $user->update([
+            'two_factor_code' => $code,
+            'two_factor_expires_at' => Carbon::now()->addMinutes(10),
+        ]);
+
+        // Send the 2FA code to the user's email
+        $user->notify(new TwoFactorCode($code));
+
         return response()->json(['token' => $token, 'user' => $user], 200);
     }
 
