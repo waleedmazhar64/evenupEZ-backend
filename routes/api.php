@@ -13,7 +13,7 @@ Route::post('/recover-password', [AuthController::class, 'recoverEmail']);
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/logout', [AuthController::class, 'logout']);
-    Route::post('/send-code', [AuthController::class, 'generate2FA']);
+    Route::get('/send-code', [AuthController::class, 'generate2FA']);
     Route::post('/verify-code', [AuthController::class, 'verify2FA']);
     // Route to get authenticated user's details
     Route::get('/user', [AuthController::class, 'user']);

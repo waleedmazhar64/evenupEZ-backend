@@ -98,7 +98,7 @@ class AuthController extends Controller
           return response()->json(['message' => 'Successfully logged out'], 200);
       }
 
-      public function generate2FA(Request $request)
+      public function generate2FA()
     {
 
         $user = Auth::user();
@@ -120,7 +120,6 @@ class AuthController extends Controller
     public function verify2FA(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
             'code' => 'required|numeric',
         ]);
 
@@ -128,7 +127,7 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = Auth::user();
 
         if (!$user || $user->two_factor_code !== $request->code) {
             return response()->json(['message' => 'Invalid 2FA code.'], 400);
