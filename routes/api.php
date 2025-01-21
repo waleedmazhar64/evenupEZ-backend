@@ -12,6 +12,7 @@ Route::post('/forget-password', [AuthController::class, 'forgotEmail']);
 Route::post('/recover-password', [AuthController::class, 'recoverEmail']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/logout', [AuthController::class, 'logout']);
     // Route to get authenticated user's details
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('stats', [UserController::class, 'dashboardStats']);
