@@ -123,7 +123,7 @@ class AuthController extends Controller
         ]);
 
         // Send the code via email
-        $user->notify(new TwoFactorCodeNotification($code));
+        $user->notify(new TwoFactorCode($code));
 
         return response()->json(['message' => '2FA code sent to your email.'], 200);
     }
