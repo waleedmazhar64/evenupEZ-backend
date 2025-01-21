@@ -41,7 +41,7 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'))) {
             $token = Auth::user()->createToken('LaravelPassport')->accessToken;
 
-            return response()->json(['token' => $token, 'name' => Auth::user()->name, 'profile_img' =>  Auth::user()->profile_img], 200);
+            return response()->json(['token' => $token, 'name' => Auth::user()->name, 'profile_img' =>  Auth::user()->profile_img, 'user' => Auth::user()], 200);
         }
 
         return response()->json(['error' => 'Unauthorized'], 401);
