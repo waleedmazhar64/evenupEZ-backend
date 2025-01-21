@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Notifications\ForgetPassword;
 use App\Notifications\TwoFactorCode;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
