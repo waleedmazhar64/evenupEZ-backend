@@ -21,6 +21,7 @@ class ExpenseController extends Controller
             'custom_splits' => 'nullable|array',
             'custom_splits.*.user_id' => 'required_with:custom_splits|exists:users,id',
             'custom_splits.*.amount' => 'required_with:custom_splits|numeric|min:0',
+            'group_id' => 'nullable|exists:groups,id',
             'due_date' => 'nullable|date',
             'payment_frequency' => 'required|in:onetime,monthly,yearly',
         ]);
@@ -54,6 +55,7 @@ class ExpenseController extends Controller
             'paid_by' => $request->paid_by,
             'split_type' => $request->split_type,
             'split_options' => $splitOptions,
+            'group_id' => $request->group_id,
             'due_date' => $request->due_date,
             'payment_frequency' => $request->payment_frequency,
         ]);
