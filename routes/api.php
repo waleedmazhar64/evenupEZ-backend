@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\ExpenseController;
+
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -32,4 +34,9 @@ Route::middleware('auth:api')->group(function () {
     //Groups
     Route::get('groups', [GroupController::class, 'index']);
     Route::put('/groups/{id}/update-status', [GroupController::class, 'updateStatus']);
+
+    //Add Expenses routes
+    Route::get('/expenses', [ExpenseController::class, 'index']);
+    Route::get('/expenses/{id}', [ExpenseController::class, 'show']);
+    Route::post('/expenses', [ExpenseController::class, 'create']);
 });
