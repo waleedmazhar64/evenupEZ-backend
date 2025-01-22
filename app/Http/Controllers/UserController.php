@@ -61,7 +61,7 @@ class UserController extends Controller
 
         $user->update($validatedData);
 
-        return response()->json(['message' => 'Profile updated successfully', 'user' => $user, 'profile_img_url' => $path ? asset('storage/' . $path) : null,]);
+        return response()->json(['message' => 'Profile updated successfully', 'user' => $user, 'profile_img_url' => isset($path) ? asset('storage/' . $path) : null,]);
     }
 
     // Change password
