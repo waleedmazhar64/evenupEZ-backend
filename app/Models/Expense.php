@@ -17,6 +17,7 @@ class Expense extends Model
         'split_options',
         'due_date',
         'payment_frequency',
+        'group_id'
     ];
 
     protected $casts = [
