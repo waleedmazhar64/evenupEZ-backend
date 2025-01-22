@@ -74,7 +74,7 @@ class ExpenseController extends Controller
     // View a single expense
     public function show($id)
     {
-        $expense = Expense::with('payer')->find($id);
+        $expense = Expense::with('payer', 'group')->find($id);
 
         if (!$expense) {
             return response()->json(['message' => 'Expense not found.'], 404);

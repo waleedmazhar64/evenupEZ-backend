@@ -27,4 +27,9 @@ class Expense extends Model
     {
         return $this->belongsTo(User::class, 'paid_by');
     }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
 }
