@@ -40,7 +40,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/groups/{groupId}/invite', [GroupController::class, 'inviteUser']);
     Route::get('/groups/{groupId}', [GroupController::class, 'show']);
     Route::get('/my-groups', [GroupController::class, 'myGroups']);
-
+    Route::get('/groups/{groupId}/expenses', [ExpenseController::class, 'getGroupExpenses']);
+    
     //Add Expenses routes
     Route::get('/expenses', [ExpenseController::class, 'index']);
     Route::get('/expenses/{id}', [ExpenseController::class, 'show']);

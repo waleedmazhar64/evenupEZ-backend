@@ -91,4 +91,31 @@ class ExpenseController extends Controller
             'split_users' => $splitUsers,
         ]);
     }
+
+    public function getGroupExpenses($groupId)
+    {
+        // Fetch all expenses for the specified group with their payer and group details
+        $expenses = Expense::with(['payer', 'group'])
+            ->where('group_id', $groupId)
+            ->get();
+
+        if ($expenses->isEmpty()) {
+            return response()->json(['message' => 'No expenses found for this group.'], 404);
+        }
+
+        // Process split options to include split users for each expense
+        $expensesWithSplitUsers = $expenses->map(function ($expense) {
+            $splitUserIds = collect($expense->split_options)->pluck('user_id');
+            $splitUsers = User::whereIn('id', $splitUserIds)->select('id', 'name', 'email')->get();
+
+            return [
+                'expense' => $expense,
+                'split_users' => $splitUsers,
+            ];
+        });
+
+        return response()->json([
+            'expenses' => $expensesWithSplitUsers,
+        ]);
+    }
 }
