@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Group;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class GroupController extends Controller
 {
@@ -17,11 +19,6 @@ class GroupController extends Controller
         $group = Group::create($request->only('name', 'status', 'admin_id'));
         $group->users()->sync($request->user_ids);
         return $group;
-    }
-
-    public function show($id)
-    {
-        return Group::with('users', 'admin')->find($id);
     }
 
     public function update(Request $request, $id)
@@ -45,5 +42,66 @@ class GroupController extends Controller
         $group->save();
 
         return response()->json(['message' => 'Group status updated successfully', 'status' => $group->status]);
+    }
+
+    public function create(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $group = Group::create([
+            'name' => $request->name,
+            'admin_id' => $request->user()->id,
+        ]);
+
+        // Attach members to the group
+        if ($request->user_ids) {
+            $group->users()->attach($request->user_ids);
+        }
+
+        $group->users()->attach($request->user()->id); // Add the creator to the group
+
+        return response()->json(['message' => 'Group created successfully.', 'group' => $group], 201);
+    }
+
+    // Invite a user to a group
+    public function inviteUser(Request $request, $groupId)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        $group->users()->attach($request->user_id);
+
+        return response()->json(['message' => 'User invited to the group.']);
+    }
+
+    // Get group details
+    public function show($groupId)
+    {
+        $group = Group::with(['users', 'expenses'])->find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        return response()->json(['group' => $group]);
     }
 }

@@ -17,4 +17,9 @@ class Group extends Model
     {
         return $this->belongsTo(User::class, 'admin_id');
     }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
 }
