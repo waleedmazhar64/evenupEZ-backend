@@ -108,7 +108,7 @@ class GroupController extends Controller
 
     public function myGroups(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         // Fetch groups where the logged-in user is a member
         $groups = Group::with('users:id,name,email')
