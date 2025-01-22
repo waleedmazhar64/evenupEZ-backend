@@ -79,6 +79,15 @@ class ExpenseController extends Controller
             return response()->json(['message' => 'Expense not found.'], 404);
         }
 
-        return response()->json(['expense' => $expense]);
+        // Get the user IDs from split_options
+        $splitUserIds = collect($expense->split_options)->pluck('user_id');
+
+        // Fetch the users involved in the splits
+        $splitUsers = User::whereIn('id', $splitUserIds)->select('id', 'name', 'email')->get();
+
+        return response()->json([
+            'expense' => $expense,
+            'split_users' => $splitUsers,
+        ]);
     }
 }
