@@ -39,6 +39,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/groups', [GroupController::class, 'create']);
     Route::post('/groups/{groupId}/invite', [GroupController::class, 'inviteUser']);
     Route::get('/groups/{groupId}', [GroupController::class, 'show']);
+    Route::get('/groups/my-groups', [GroupController::class, 'myGroups']);
 
     //Add Expenses routes
     Route::get('/expenses', [ExpenseController::class, 'index']);

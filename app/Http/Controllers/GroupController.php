@@ -105,4 +105,18 @@ class GroupController extends Controller
 
         return response()->json(['group' => $group]);
     }
+
+    public function myGroups(Request $request)
+    {
+        $user = $request->user();
+
+        // Fetch groups where the logged-in user is a member
+        $groups = Group::with('users:id,name,email')
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->get();
+
+        return response()->json(['groups' => $groups]);
+    }
 }
