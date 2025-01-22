@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class GroupController extends Controller
 {
@@ -58,7 +59,7 @@ class GroupController extends Controller
 
         $group = Group::create([
             'name' => $request->name,
-            'admin_id' => $request->user()->id,
+            'admin_id' => Auth::user()->id,
         ]);
 
         // Attach members to the group
