@@ -118,4 +118,35 @@ class ExpenseController extends Controller
             'expenses' => $expensesWithSplitUsers,
         ]);
     }
+
+    public function uploadReceipts(Request $request, $expenseId)
+    {
+        $expense = Expense::find($expenseId);
+
+        if (!$expense) {
+            return response()->json(['message' => 'Expense not found.'], 404);
+        }
+
+        $request->validate([
+            'receipts.*' => 'required|file|mimes:jpeg,png,pdf|max:2048', // Validate uploaded files
+        ]);
+
+        $uploadedFiles = [];
+        if ($request->hasFile('receipts')) {
+            foreach ($request->file('receipts') as $file) {
+                $path = $file->store('receipts', 'public'); // Store in public/receipts folder
+
+                $receipt = $expense->receipts()->create([
+                    'file_path' => $path,
+                ]);
+
+                $uploadedFiles[] = $receipt;
+            }
+        }
+
+        return response()->json([
+            'message' => 'Receipts uploaded successfully.',
+            'receipts' => $uploadedFiles,
+        ]);
+    }
 }

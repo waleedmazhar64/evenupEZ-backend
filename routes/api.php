@@ -41,9 +41,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/groups/{groupId}', [GroupController::class, 'show']);
     Route::get('/my-groups', [GroupController::class, 'myGroups']);
     Route::get('/groups/{groupId}/expenses', [ExpenseController::class, 'getGroupExpenses']);
-    
+    Route::post('/groups/{groupId}/comments', [GroupController::class, 'addComment']);
+
     //Add Expenses routes
     Route::get('/expenses', [ExpenseController::class, 'index']);
     Route::get('/expenses/{id}', [ExpenseController::class, 'show']);
     Route::post('/expenses', [ExpenseController::class, 'create']);
+    Route::post('/expenses/{expenseId}/receipts', [ExpenseController::class, 'uploadReceipts']);
+    Route::post('/groups/{groupId}/comments', [GroupController::class, 'addComment']);
+
 });

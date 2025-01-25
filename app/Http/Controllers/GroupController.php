@@ -119,4 +119,28 @@ class GroupController extends Controller
 
         return response()->json(['groups' => $groups]);
     }
+
+    public function addComment(Request $request, $groupId)
+    {
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        $request->validate([
+            'comment' => 'required|string',
+        ]);
+
+        $comment = $group->comments()->create([
+            'user_id' => $request->user()->id,
+            'comment' => $request->comment,
+        ]);
+
+        return response()->json([
+            'message' => 'Comment added successfully.',
+            'comment' => $comment,
+        ]);
+    }
+
 }
