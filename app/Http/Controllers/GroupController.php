@@ -143,4 +143,21 @@ class GroupController extends Controller
         ]);
     }
 
+    public function getComments($groupId)
+    {
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        $comments = $group->comments()->with('user:id,name,email')->get();
+
+        return response()->json([
+            'group_id' => $groupId,
+            'comments' => $comments,
+        ]);
+    }
+
+
 }
