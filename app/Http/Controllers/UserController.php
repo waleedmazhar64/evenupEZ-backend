@@ -153,4 +153,14 @@ class UserController extends Controller
         $user->delete();
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
+
+    public function deleteUserByEmail($email)
+    {
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            $user->delete();
+            return response()->json(['message' => 'User deleted successfully.'], 200);
+        }
+        return response()->json(['message' => 'User not found.'], 404);
+    }
 }

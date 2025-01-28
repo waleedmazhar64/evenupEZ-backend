@@ -55,7 +55,7 @@ Route::middleware('auth:api')->group(function () {
     //Delete User
     Route::delete('/user', [UserController::class, 'deleteCurrentUser']);
     Route::delete('/user/{id}', [UserController::class, 'deleteUserById']);
-
+    Route::delete('/user/delete-by-email/{email}', [UserController::class, 'deleteUserByEmail']);
 
 
 });
