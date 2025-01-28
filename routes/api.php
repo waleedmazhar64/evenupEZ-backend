@@ -52,4 +52,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/groups/{groupId}/comments', [GroupController::class, 'getComments']);
 
 
+    //Delete User
+    Route::delete('/user', [UserController::class, 'deleteCurrentUser']);
+    Route::delete('/user/{id}', [UserController::class, 'deleteUserById']);
+
+
+
 });

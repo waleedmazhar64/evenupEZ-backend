@@ -128,4 +128,29 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Notification settings updated successfully', 'user' => $user]);
     }
+
+    public function deleteCurrentUser(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            $user->delete();
+            return response()->json(['message' => 'User deleted successfully'], 200);
+        }
+
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    // Delete a user by ID (Admin or authorized role required)
+    public function deleteUserById($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->delete();
+        return response()->json(['message' => 'User deleted successfully'], 200);
+    }
 }
