@@ -111,7 +111,7 @@ class GroupController extends Controller
         $user = Auth::user();
 
         // Fetch groups where the logged-in user is a member
-        $groups = Group::with('users:id,name,email')
+        $groups = Group::with('users', 'expenses')
             ->whereHas('users', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
