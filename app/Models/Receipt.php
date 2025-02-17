@@ -9,10 +9,15 @@ class Receipt extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['expense_id', 'file_path'];
+    protected $fillable = ['expense_id', 'user_id', 'file_path', 'description'];
 
     public function expense()
     {
         return $this->belongsTo(Expense::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

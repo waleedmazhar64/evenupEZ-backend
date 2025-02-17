@@ -128,16 +128,25 @@ class ExpenseController extends Controller
         }
 
         $request->validate([
-            'receipts.*' => 'required|file|mimes:jpeg,png,pdf|max:2048', // Validate uploaded files
+            'receipts' => 'required|array',
+            'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'receipts.*.description' => 'nullable|string|max:255',
         ]);
 
         $uploadedFiles = [];
-        if ($request->hasFile('receipts')) {
-            foreach ($request->file('receipts') as $file) {
-                $path = $file->store('receipts', 'public'); // Store in public/receipts folder
+        
+        if ($request->has('receipts')) {
+            foreach ($request->receipts as $receiptData) {
+                if (!isset($receiptData['file'])) continue;
 
-                $receipt = $expense->receipts()->create([
+                $file = $receiptData['file'];
+                $path = $file->store('receipts', 'public');
+
+                $receipt = Receipt::create([
+                    'expense_id' => $expenseId,
+                    'user_id' => Auth::id(), // Link to the logged-in user
                     'file_path' => $path,
+                    'description' => $receiptData['description'] ?? null,
                 ]);
 
                 $uploadedFiles[] = $receipt;
@@ -147,6 +156,6 @@ class ExpenseController extends Controller
         return response()->json([
             'message' => 'Receipts uploaded successfully.',
             'receipts' => $uploadedFiles,
-        ]);
+        ], 201);
     }
 }
