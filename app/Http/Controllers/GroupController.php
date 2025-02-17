@@ -97,7 +97,7 @@ class GroupController extends Controller
     // Get group details
     public function show($groupId)
     {
-        $group = Group::with(['users', 'expenses', 'comments', 'comments.user:id,name,email', 'expenses.receipts', 'expenses.receipts.users'])->find($groupId);
+        $group = Group::with(['users', 'expenses', 'comments', 'comments.user:id,name,email', 'expenses.receipts', 'expenses.receipts.user'])->find($groupId);
 
         if (!$group) {
             return response()->json(['message' => 'Group not found.'], 404);
@@ -111,7 +111,7 @@ class GroupController extends Controller
         $user = Auth::user();
 
         // Fetch groups where the logged-in user is a member
-        $groups = Group::with('users', 'expenses', 'comments', 'comments.user:id,name,email', 'expenses.receipts', 'expenses.receipts.users')
+        $groups = Group::with('users', 'expenses', 'comments', 'comments.user:id,name,email', 'expenses.receipts', 'expenses.receipts.user')
             ->whereHas('users', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })

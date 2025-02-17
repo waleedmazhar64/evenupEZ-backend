@@ -74,7 +74,7 @@ class ExpenseController extends Controller
     // View a single expense
     public function show($id)
     {
-        $expense = Expense::with('payer', 'group', 'expenses.receipts', 'expenses.receipts.users')->find($id);
+        $expense = Expense::with('payer', 'group', 'receipts', 'receipts.user')->find($id);
 
         if (!$expense) {
             return response()->json(['message' => 'Expense not found.'], 404);
@@ -95,7 +95,7 @@ class ExpenseController extends Controller
     public function getGroupExpenses($groupId)
     {
         // Fetch all expenses for the specified group with their payer and group details
-        $expenses = Expense::with(['payer', 'group', 'expenses.receipts', 'expenses.receipts.users'])
+        $expenses = Expense::with(['payer', 'group', 'receipts', 'receipts.user'])
             ->where('group_id', $groupId)
             ->get();
 
