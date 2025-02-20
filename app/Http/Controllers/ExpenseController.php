@@ -131,7 +131,7 @@ class ExpenseController extends Controller
 
         $request->validate([
             'receipts' => 'required|array',
-            'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf',
             'receipts.*.description' => 'nullable|string|max:255',
         ]);
 
