@@ -123,6 +123,10 @@ class ExpenseController extends Controller
 
     public function uploadReceipts(Request $request, $expenseId)
     {
+        return response()->json([
+            'message' => 'Receipts request.',
+            'receipts' => $request->all(),
+        ], 201);
         $expense = Expense::find($expenseId);
 
         if (!$expense) {
