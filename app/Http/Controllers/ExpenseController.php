@@ -123,21 +123,29 @@ class ExpenseController extends Controller
 
     public function uploadReceipts(Request $request, $expenseId)
     {
-        return response()->json([
-            'message' => 'Receipts request.',
-            'receipts' => $request->all(),
-        ], 201);
+        
         $expense = Expense::find($expenseId);
 
         if (!$expense) {
-            return response()->json(['message' => 'Expense not found.'], 404);
+            return response()->json(['message' => 'Expense not found.', 'receipts_request' => $request->all(),], 404);
         }
 
-        $request->validate([
-            'receipts' => 'required|array',
-            'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf',
-            'receipts.*.description' => 'nullable|string|max:255',
-        ]);
+        // Custom validation with detailed error messages
+    $validator = Validator::make($request->all(), [
+        'receipts' => 'required|array|min:1',
+        'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+        'receipts.*.description' => 'nullable|string|max:255',
+    ]);
+
+    // If validation fails, return a structured error response
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+            'receipts_request' => $request->all(),
+        ], 422);
+    }
+
 
         $uploadedFiles = [];
         
@@ -162,6 +170,7 @@ class ExpenseController extends Controller
         return response()->json([
             'message' => 'Receipts uploaded successfully.',
             'receipts' => $uploadedFiles,
+            'receipts_request' => $request->all(),
         ], 201);
     }
 }
