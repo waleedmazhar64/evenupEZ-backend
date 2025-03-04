@@ -133,7 +133,7 @@ class ExpenseController extends Controller
         // Custom validation with detailed error messages
     $validator = Validator::make($request->all(), [
         'receipts' => 'required|array|min:1',
-        'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+        'receipts.*.file' => 'required|file|mimes:jpeg,png,pdf',
         'receipts.*.description' => 'nullable|string|max:255',
     ]);
 
