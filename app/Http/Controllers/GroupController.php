@@ -159,5 +159,28 @@ class GroupController extends Controller
         ]);
     }
 
+    public function updateUserStatus(){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'status' => 'required|string|in:pending,paid,partially_paid',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+    
+        $updated = DB::table('group_user')
+            ->where('group_id', $groupId)
+            ->where('user_id', $request->user_id)
+            ->update(['status' => $request->status]);
+    
+        if ($updated) {
+            return response()->json(['message' => 'Status updated successfully.']);
+        }
+    
+        return response()->json(['message' => 'Failed to update status.'], 400);
+    }
+    
+
 
 }

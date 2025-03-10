@@ -42,6 +42,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/my-groups', [GroupController::class, 'myGroups']);
     Route::get('/groups/{groupId}/expenses', [ExpenseController::class, 'getGroupExpenses']);
     Route::post('/groups/{groupId}/comments', [GroupController::class, 'addComment']);
+    Route::post('/groups/{groupId}/update-user-status', [GroupController::class, 'updateUserStatus']);
+
 
     //Add Expenses routes
     Route::get('/expenses', [ExpenseController::class, 'index']);
