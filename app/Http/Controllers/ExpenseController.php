@@ -20,7 +20,8 @@ class ExpenseController extends Controller
             'paid_by' => 'required|exists:users,id',
             'split_type' => 'required|in:equal,custom',
             'split_users' => 'required|array',
-            'split_users.*' => 'required|exists:users,id',
+            'split_users.*.user_id' => 'required|exists:users,id',
+            'split_users.*.status' => 'nullable|in:pending,paid,partially_paid',
             'custom_splits' => 'nullable|array',
             'custom_splits.*.user_id' => 'required_with:custom_splits|exists:users,id',
             'custom_splits.*.amount' => 'required_with:custom_splits|numeric|min:0',
@@ -38,11 +39,11 @@ class ExpenseController extends Controller
         $splitOptions = [];
         if ($request->split_type === 'equal') {
             $splitAmount = round($request->amount / count($request->split_users), 2);
-            foreach ($request->split_users as $userId) {
+            foreach ($request->split_users as $user) {
                 $splitOptions[] = [
-                    'user_id' => $userId,
+                    'user_id' => $user['user_id'],
                     'amount' => $splitAmount,
-                    'status' => $request->input('status', 'pending'),
+                    'status' => $user['status'] ?? 'pending', // Default to 'pending'
                 ];
             }
         } elseif ($request->split_type === 'custom') {
