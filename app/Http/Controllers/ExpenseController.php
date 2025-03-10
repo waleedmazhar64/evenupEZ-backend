@@ -24,6 +24,7 @@ class ExpenseController extends Controller
             'custom_splits' => 'nullable|array',
             'custom_splits.*.user_id' => 'required_with:custom_splits|exists:users,id',
             'custom_splits.*.amount' => 'required_with:custom_splits|numeric|min:0',
+            'custom_splits.*.status' => 'required_with:custom_splits|in:pending,partially_paid,paid',
             'group_id' => 'nullable|exists:groups,id',
             'due_date' => 'nullable|date',
             'payment_frequency' => 'required|in:onetime,monthly,yearly',
@@ -41,6 +42,7 @@ class ExpenseController extends Controller
                 $splitOptions[] = [
                     'user_id' => $userId,
                     'amount' => $splitAmount,
+                    'status' => $request->input('status', 'pending'),
                 ];
             }
         } elseif ($request->split_type === 'custom') {
@@ -48,7 +50,13 @@ class ExpenseController extends Controller
             if ($totalCustomAmount != $request->amount) {
                 return response()->json(['message' => 'Custom split amounts do not equal total amount.'], 400);
             }
-            $splitOptions = $request->custom_splits;
+            foreach ($request->custom_splits as $split) {
+                $splitOptions[] = [
+                    'user_id' => $split['user_id'],
+                    'amount' => $split['amount'],
+                    'status' => $split['status'] ?? 'pending', // Status from request
+                ];
+            }
         }
 
         // Save the expense
@@ -64,6 +72,41 @@ class ExpenseController extends Controller
         ]);
 
         return response()->json(['message' => 'Expense created successfully.', 'expense' => $expense], 201);
+    }
+
+    public function updateUserStatus(Request $request, $expenseId){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'status' => 'required|in:pending,partially_paid,paid',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+    
+        $expense = Expense::find($expenseId);
+    
+        if (!$expense) {
+            return response()->json(['message' => 'Expense not found.'], 404);
+        }
+    
+        $splitOptions = $expense->split_options;
+        
+        // Find the user in the split_options array
+        foreach ($splitOptions as &$split) {
+            if ($split['user_id'] == $request->user_id) {
+                $split['status'] = $request->status;
+            }
+        }
+    
+        // Save the updated expense
+        $expense->split_options = $splitOptions;
+        $expense->save();
+    
+        return response()->json([
+            'message' => 'User status updated successfully.',
+            'expense' => $expense,
+        ]);
     }
 
     // Get all expenses
