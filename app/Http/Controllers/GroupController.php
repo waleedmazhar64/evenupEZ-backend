@@ -159,7 +159,7 @@ class GroupController extends Controller
         ]);
     }
 
-    public function updateUserStatus(){
+    public function updateUserStatus(Request $request, $groupId){
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'status' => 'required|string|in:pending,paid,partially_paid',
