@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\User;
+use App\Models\Receipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -182,6 +183,55 @@ class GroupController extends Controller
         return response()->json(['message' => 'Failed to update status.'], 400);
     }
     
+    public function uploadGroupReceipts(Request $request, $groupId)
+    {
+        $group = Group::find($groupId);
 
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        $request->validate([
+            'receipts.*' => 'required|file|mimes:jpeg,png,heic,heif,pdf|max:2048',
+            'descriptions.*' => 'nullable|string|max:255',
+        ]);
+
+        $uploadedFiles = [];
+        if ($request->hasFile('receipts')) {
+            foreach ($request->file('receipts') as $index => $file) {
+                $path = $file->store('receipts', 'public');
+
+                $receipt = Receipt::create([
+                    'group_id' => $groupId,
+                    'file_path' => $path,
+                    'description' => $request->descriptions[$index] ?? null,
+                    'user_id' => auth()->id(),
+                ]);
+
+                $uploadedFiles[] = $receipt;
+            }
+        }
+
+        return response()->json([
+            'message' => 'Receipts uploaded successfully.',
+            'receipts' => $uploadedFiles,
+        ]);
+    }
+
+    public function getGroupReceipts($groupId)
+    {
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        $receipts = Receipt::where('group_id', $groupId)->with('user:id,name,email')->get();
+
+        return response()->json([
+            'group_id' => $groupId,
+            'receipts' => $receipts,
+        ]);
+    }
 
 }
