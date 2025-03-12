@@ -191,6 +191,7 @@ class GroupController extends Controller
             return response()->json(['message' => 'Group not found.'], 404);
         }
 
+        // Validation
         $validator = Validator::make($request->all(), [
             'receipts' => 'required|array|min:1',
             'receipts.*.file' => 'required|file|mimes:jpeg,png,heic,heif,pdf|max:2048',
@@ -202,15 +203,18 @@ class GroupController extends Controller
         }
 
         $uploadedFiles = [];
-        if ($request->hasFile('receipts')) {
-            foreach ($request->file('receipts') as $index => $file) {
+        if ($request->has('receipts')) {
+            foreach ($request->receipts as $receiptData) {
+                if (!isset($receiptData['file'])) continue;
+
+                $file = $receiptData['file'];
                 $path = $file->store('receipts', 'public');
 
                 $receipt = Receipt::create([
                     'group_id' => $groupId,
+                    'user_id' => Auth::id(), // Link to the logged-in user
                     'file_path' => $path,
-                    'description' => $request->descriptions[$index] ?? null,
-                    'user_id' => auth()->id(),
+                    'description' => $receiptData['description'] ?? null,
                 ]);
 
                 $uploadedFiles[] = $receipt;
@@ -220,9 +224,10 @@ class GroupController extends Controller
         return response()->json([
             'message' => 'Receipts uploaded successfully.',
             'receipts' => $uploadedFiles,
-        ]);
+            'receipts_request' => $request->all(),
+        ], 201);
     }
-
+    
     public function getGroupReceipts($groupId)
     {
         $group = Group::find($groupId);
