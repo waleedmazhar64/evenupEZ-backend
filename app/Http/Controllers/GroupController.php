@@ -191,10 +191,15 @@ class GroupController extends Controller
             return response()->json(['message' => 'Group not found.'], 404);
         }
 
-        $request->validate([
-            'receipts.*' => 'required|file|mimes:jpeg,png,heic,heif,pdf|max:2048',
-            'descriptions.*' => 'nullable|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'receipts' => 'required|array|min:1',
+            'receipts.*.file' => 'required|file|mimes:jpeg,png,heic,heif,pdf|max:2048',
+            'receipts.*.description' => 'nullable|string|max:255',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $uploadedFiles = [];
         if ($request->hasFile('receipts')) {
