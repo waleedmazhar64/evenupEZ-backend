@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use App\Models\Notification;
 
 class GroupController extends Controller
 {
@@ -78,7 +79,7 @@ class GroupController extends Controller
     public function inviteUser(Request $request, $groupId)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id', // user to invite
         ]);
 
         if ($validator->fails()) {
@@ -91,10 +92,67 @@ class GroupController extends Controller
             return response()->json(['message' => 'Group not found.'], 404);
         }
 
-        $group->users()->attach($request->user_id);
+        $inviteeId = $request->user_id;
+        $senderId = $request->user()->id;
+        $senderName = $request->user()->name;
 
-        return response()->json(['message' => 'User invited to the group.']);
+        // Check if already invited or a member
+        $alreadyInvited = Notification::where([
+            ['user_id', $inviteeId],
+            ['type', 'group_invite'],
+            ['data->group_id', $groupId]
+        ])->where('read', false)->exists();
+
+        if ($alreadyInvited || $group->users()->where('user_id', $inviteeId)->exists()) {
+            return response()->json(['message' => 'User already invited or is a member.'], 409);
+        }
+
+        Notification::create([
+            'user_id' => $inviteeId,
+            'type' => 'group_invite',
+            'message' => "$senderName sent you invite to join the \"{$group->name}\"",
+            'data' => [
+                'group_id' => $groupId,
+                'sender_id' => $senderId
+            ],
+        ]);
+
+        return response()->json(['message' => 'Invitation sent successfully.']);
     }
+
+    public function acceptInvite(Request $request, $id)
+    {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->where('type', 'group_invite')
+            ->first();
+
+        if (!$notification) {
+            return response()->json(['message' => 'Invitation not found.'], 404);
+        }
+
+        $groupId = $notification->data['group_id'] ?? null;
+        if (!$groupId) {
+            return response()->json(['message' => 'Invalid group information in notification.'], 422);
+        }
+
+        $group = Group::find($groupId);
+        if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
+
+        // Add user to the group if not already added
+        if (!$group->users()->where('user_id', $request->user()->id)->exists()) {
+            $group->users()->attach($request->user()->id);
+        }
+
+        // Mark notification as read
+        $notification->update(['read' => true]);
+
+        return response()->json(['message' => 'You have successfully joined the group.']);
+    }
+
+
 
     // Get group details
     public function show($groupId)

@@ -62,5 +62,11 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/user/{id}', [UserController::class, 'deleteUserById']);
     Route::delete('/user/delete-by-email/{email}', [UserController::class, 'deleteUserByEmail']);
 
+    //Notifications Routes
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/respond', [NotificationController::class, 'respond']);
+    Route::post('/notifications/{id}/accept-invite', [GroupController::class, 'acceptInvite']);
+
+
 
 });
