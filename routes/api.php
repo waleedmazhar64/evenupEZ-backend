@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\NotificationController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
