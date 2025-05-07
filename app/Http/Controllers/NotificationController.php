@@ -35,7 +35,9 @@ class NotificationController extends Controller
             // Example logic:
             $groupId = $notification->data['group_id'] ?? null;
             if ($groupId) {
-                $request->user()->groups()->attach($groupId);
+                
+                $group = Group::find($groupId);
+                $group->users()->attach($request->user()->id);
             }
         }
 
