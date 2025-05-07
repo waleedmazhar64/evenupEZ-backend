@@ -123,7 +123,7 @@ class GroupController extends Controller
     public function acceptInvite(Request $request, $id)
     {
         $notification = Notification::where('id', $id)
-            ->where('user_id', $request->user()->id)
+            //->where('user_id', $request->user()->id)
             ->where('type', 'group_invite')
             ->first();
 
