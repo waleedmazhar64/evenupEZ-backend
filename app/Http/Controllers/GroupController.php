@@ -79,7 +79,8 @@ class GroupController extends Controller
     public function inviteUser(Request $request, $groupId)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id', // user to invite
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id'
         ]);
 
         if ($validator->fails()) {
@@ -92,33 +93,46 @@ class GroupController extends Controller
             return response()->json(['message' => 'Group not found.'], 404);
         }
 
-        $inviteeId = $request->user_id;
         $senderId = $request->user()->id;
         $senderName = $request->user()->name;
+        $invited = [];
+        $skipped = [];
 
-        // Check if already invited or a member
-        $alreadyInvited = Notification::where([
-            ['user_id', $inviteeId],
-            ['type', 'group_invite'],
-            ['data->group_id', $groupId]
-        ])->where('read', false)->exists();
+        foreach ($request->user_ids as $inviteeId) {
+            // Skip if already a member or already invited
+            $alreadyInvited = Notification::where([
+                ['user_id', $inviteeId],
+                ['type', 'group_invite'],
+                ['data->group_id', $groupId]
+            ])->where('read', false)->exists();
 
-        if ($alreadyInvited || $group->users()->where('user_id', $inviteeId)->exists()) {
-            return response()->json(['message' => 'User already invited or is a member.'], 409);
+            $alreadyMember = $group->users()->where('user_id', $inviteeId)->exists();
+
+            if ($alreadyInvited || $alreadyMember) {
+                $skipped[] = $inviteeId;
+                continue;
+            }
+
+            Notification::create([
+                'user_id' => $inviteeId,
+                'type' => 'group_invite',
+                'message' => "$senderName sent you invite to join the \"{$group->name}\"",
+                'data' => [
+                    'group_id' => $groupId,
+                    'sender_id' => $senderId
+                ],
+            ]);
+
+            $invited[] = $inviteeId;
         }
 
-        Notification::create([
-            'user_id' => $inviteeId,
-            'type' => 'group_invite',
-            'message' => "$senderName sent you invite to join the \"{$group->name}\"",
-            'data' => [
-                'group_id' => $groupId,
-                'sender_id' => $senderId
-            ],
+        return response()->json([
+            'message' => 'Invitation process completed.',
+            'invited' => $invited,
+            'skipped' => $skipped
         ]);
-
-        return response()->json(['message' => 'Invitation sent successfully.']);
     }
+
 
     public function acceptInvite(Request $request, $id)
     {
