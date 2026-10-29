@@ -39,6 +39,7 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+          php artisan passport:keys --force
       - name: Run HTTP and database regression tests
         env:
           DB_CONNECTION: sqlite
