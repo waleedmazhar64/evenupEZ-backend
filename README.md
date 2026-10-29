@@ -2,12 +2,14 @@
 
 A personal full-stack application for recording shared expenses, managing groups and attaching receipts. The Laravel API is paired with an [Angular frontend](https://github.com/waleedmazhar64/evenupEZ-frontend).
 
+**Reviewing Waleed Mazhar for a software engineering role? [Start with the engineering profile and evidence guide](docs/engineering-profile.md).**
+
 ## Start with the engineering example
 
-The proposed implementation is in [PR #2](https://github.com/waleedmazhar64/evenupEZ-backend/pull/2). [CI passed on PHP 8.2 and 8.3 for commit 50f3c6e](https://github.com/waleedmazhar64/evenupEZ-backend/actions/runs/40807398091): 234 isolated money checks plus three authenticated HTTP/database tests (12 assertions) per PHP version.
+The implementation was merged in [PR #2](https://github.com/waleedmazhar64/evenupEZ-backend/pull/2). [CI passed on PHP 8.2 and 8.3 for commit 50f3c6e](https://github.com/waleedmazhar64/evenupEZ-backend/actions/runs/40807398091): 234 isolated money checks plus three authenticated HTTP/database tests (12 assertions) per PHP version.
 
 
-[Keeping every penny in an expense split](docs/expense-allocation-case-study.md) follows a real defect from reproduction to a proposed fix: splitting 10.00 three ways must total 10.00.
+[Keeping every penny in an expense split](docs/expense-allocation-case-study.md) follows a real defect from reproduction to a tested fix: splitting 10.00 three ways must total 10.00.
 
 | Review question | Code or evidence |
 | --- | --- |
