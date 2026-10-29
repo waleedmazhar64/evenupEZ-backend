@@ -13,7 +13,7 @@ class ExpenseAllocationTest extends TestCase
 
     public function test_equal_split_conserves_the_total_in_the_api_and_database(): void
     {
-        $users = User::factory()->count(3)->create();
+        $users = User::factory()->count(3)->create(['phone' => '0000000000']);
         Passport::actingAs($users->first());
 
         $response = $this->postJson('/api/expenses', [
@@ -32,7 +32,7 @@ class ExpenseAllocationTest extends TestCase
 
     public function test_empty_participants_return_validation_errors_without_writing_an_expense(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '0000000000']);
         Passport::actingAs($user);
         $this->postJson('/api/expenses', [
             'name' => 'Dinner', 'amount' => '10.00', 'paid_by' => $user->id,
@@ -43,7 +43,7 @@ class ExpenseAllocationTest extends TestCase
 
     public function test_custom_total_mismatch_is_rejected_without_writing_an_expense(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '0000000000']);
         Passport::actingAs($user);
         $this->postJson('/api/expenses', [
             'name' => 'Dinner', 'amount' => '10.00', 'paid_by' => $user->id,
