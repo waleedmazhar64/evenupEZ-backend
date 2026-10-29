@@ -1,57 +1,78 @@
-# EvenUpEZ — Shared Expense Management API
+# EvenUpEZ | Group expense management
 
-EvenUpEZ is a Laravel-based backend for tracking group expenses and settlements. It is part of a full-stack expense-sharing application.
+A personal full-stack application for recording shared expenses, managing groups and attaching receipts. The Laravel API is paired with an [Angular frontend](https://github.com/waleedmazhar64/evenupEZ-frontend).
 
-## Product capabilities
+## Start with the engineering example
 
-- Group creation and member management
-- Shared expense recording
-- Equal and custom expense splits
-- Balance tracking and settlement workflows
-- REST API consumed by the frontend
+[Keeping every penny in an expense split](docs/expense-allocation-case-study.md) follows a real defect from reproduction to a proposed fix: splitting 10.00 three ways must total 10.00.
 
-## Engineering focus
+| Review question | Code or evidence |
+| --- | --- |
+| How are remainder pennies allocated? | [ExpenseSplitter](app/Domain/Expenses/ExpenseSplitter.php) |
+| How does the API validate and persist a split? | [ExpenseController](app/Http/Controllers/ExpenseController.php) |
+| What happens with invalid input? | [HTTP and database tests](tests/Feature/ExpenseAllocationTest.php) |
+| Do totals remain correct across different values? | [Regression and invariant checks](tests/Smoke/expense_split_checks.php) |
+| Has this exact change passed automated checks? | [GitHub Actions runs](https://github.com/waleedmazhar64/evenupEZ-backend/actions) |
 
-Expense-sharing systems require consistent balance calculations, input validation, and careful handling of changes to shared expenses. This project can be discussed in interviews through its domain model, API design, authentication, and transaction integrity.
+## Implemented areas
 
-## Technology
+- Authentication using Laravel Passport.
+- Group creation and invitation workflows.
+- Equal and custom expense splits.
+- Group comments and receipt uploads.
+- REST endpoints consumed by the frontend.
 
-PHP, Laravel, relational database, and REST APIs. See `composer.json` and environment configuration for the repository's exact versions and installed dependencies.
+## Architecture
+
+```mermaid
+flowchart TD
+  UI["Angular frontend"] --> API["Laravel routes and controllers"]
+  API --> AUTH["Passport authentication"]
+  API --> SPLIT["Expense allocation service"]
+  API --> DB["Relational database"]
+  API --> FILES["Receipt storage"]
+```
 
 ## Local setup
 
+PHP 8.2+ and Composer are required. Exact locked dependencies are in `composer.lock`.
+
 ```bash
+git clone https://github.com/waleedmazhar64/evenupEZ-backend.git
+cd evenupEZ-backend
 composer install
 cp .env.example .env
 php artisan key:generate
 ```
 
-Set database credentials in `.env`, then:
+Set up a disposable database in `.env`, then:
 
 ```bash
 php artisan migrate
+php artisan passport:keys
+php artisan passport:client --personal
 php artisan serve
 ```
 
-Run automated tests, where configured, with:
+Use the frontend's instructions for its API base URL. Do not commit local environment values or generated keys.
+
+## Run the focused checks
+
+The money checks run without Composer or a database:
 
 ```bash
-php artisan test
+php tests/Smoke/expense_split_checks.php
 ```
 
-Do not run database seeders against a non-disposable database without reviewing their effects.
+After installing dependencies, run the authenticated HTTP/database regressions against an isolated database:
 
-## Repository map
+```bash
+DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test --filter=ExpenseAllocationTest
+```
 
-- `app/` — application domain and HTTP code
-- `routes/` — HTTP/API route definitions
-- `database/migrations/` — schema changes
-- `tests/` — test suite
+The workflow checks PHP 8.2 and 8.3. Inspect the run associated with the commit before describing checks as passing.
 
-## Verification status
+## Scope
 
-This documentation describes the project's intended functionality and development setup. No performance benchmarks, passing test results, or production traffic metrics are claimed here without verification.
+This is a personal project and an inspectable engineering sample. The allocation improvement does not establish production scale or whole-application security. Use synthetic demo data; review object-level access controls and receipt privacy before a public deployment. The [case study](docs/expense-allocation-case-study.md) records the implementation trade-offs and AI assistance.
 
-## Suggested technical discussion
-
-How group balances are represented, rounding and precision for currency, handling partial settlements, transactional consistency, authorization boundaries, and integration with a frontend.
