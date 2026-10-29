@@ -1,0 +1,47 @@
+name: Expense allocation checks
+
+on:
+  push:
+    branches: [main, portfolio/exact-expense-allocation]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  allocation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+      - name: Check changed PHP syntax
+        run: |
+          php -l app/Domain/Expenses/ExpenseSplitter.php
+          php -l app/Http/Controllers/ExpenseController.php
+          php -l tests/Feature/ExpenseAllocationTest.php
+      - name: Run dependency-free money regression checks
+        run: php tests/Smoke/expense_split_checks.php
+      - name: Install locked development dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Prepare isolated test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan passport:keys --force
+      - name: Run HTTP and database regression tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test --filter=ExpenseAllocationTest

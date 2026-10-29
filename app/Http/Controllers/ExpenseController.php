@@ -8,22 +8,24 @@ use App\Models\Receipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Domain\Expenses\ExpenseSplitter;
+use InvalidArgumentException;
 
 class ExpenseController extends Controller
 {
     // Create a new expense
-    public function create(Request $request)
+    public function create(Request $request, ExpenseSplitter $splitter)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01|max:99999999.99',
             'paid_by' => 'required|exists:users,id',
             'split_type' => 'required|in:equal,custom',
-            'split_users' => 'nullable|array',
-            'split_users.*' => 'required_with:split_users|exists:users,id',
-            'custom_splits' => 'nullable|array',
-            'custom_splits.*.user_id' => 'required_with:custom_splits|exists:users,id',
-            'custom_splits.*.amount' => 'required_with:custom_splits|numeric|min:0',
+            'split_users' => 'required_if:split_type,equal|nullable|array|min:1|max:1000',
+            'split_users.*' => 'required_with:split_users|integer|distinct|exists:users,id',
+            'custom_splits' => 'required_if:split_type,custom|nullable|array|min:1|max:1000',
+            'custom_splits.*.user_id' => 'required_with:custom_splits|integer|distinct|exists:users,id',
+            'custom_splits.*.amount' => 'required_with:custom_splits|numeric|min:0|max:99999999.99',
             'group_id' => 'nullable|exists:groups,id',
             'due_date' => 'nullable|date',
             'payment_frequency' => 'required|in:onetime,monthly,yearly',
@@ -33,22 +35,15 @@ class ExpenseController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Calculate split amounts
-        $splitOptions = [];
-        if ($request->split_type === 'equal') {
-            $splitAmount = round($request->amount / count($request->split_users), 2);
-            foreach ($request->split_users as $userId) {
-                $splitOptions[] = [
-                    'user_id' => $userId,
-                    'amount' => $splitAmount,
-                ];
-            }
-        } elseif ($request->split_type === 'custom') {
-            $totalCustomAmount = collect($request->custom_splits)->sum('amount');
-            if ($totalCustomAmount != $request->amount) {
-                return response()->json(['message' => 'Custom split amounts do not equal total amount.'], 400);
-            }
-            $splitOptions = $request->custom_splits;
+        // Allocate in integer minor units so the shares conserve every penny.
+        try {
+            $splitOptions = $request->split_type === 'equal'
+                ? $splitter->equal($request->input('amount'), $request->input('split_users'))
+                : $splitter->custom($request->input('amount'), $request->input('custom_splits'));
+        } catch (InvalidArgumentException $exception) {
+            return response()->json([
+                'errors' => ['split' => [$exception->getMessage()]],
+            ], 422);
         }
 
         // Save the expense
@@ -174,3 +169,4 @@ class ExpenseController extends Controller
         ], 201);
     }
 }
+
