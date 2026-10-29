@@ -6,7 +6,7 @@ EvenUpEZ's original expense controller calculated an equal share with `round(tot
 
 ## Change
 
-The proposed `ExpenseSplitter` separates money allocation from the HTTP controller. It parses amounts into integer minor units, divides using integer arithmetic, and distributes the remainder in participant order. The same 10.00 becomes 3.34 + 3.33 + 3.33.
+The `ExpenseSplitter` separates money allocation from the HTTP controller. It parses amounts into integer minor units, divides using integer arithmetic, and distributes the remainder in participant order. The same 10.00 becomes 3.34 + 3.33 + 3.33.
 
 Custom splits are summed in minor units. The service rejects duplicate participants, missing/empty splits, negative totals, more than two decimal places, and amounts beyond the existing DECIMAL(10,2) column. The HTTP controller validates required fields before calculating and returns a 422 validation response for invalid split inputs.
 
@@ -19,6 +19,10 @@ Numeric `amount` values are retained in the existing response shape; calculation
 3. Run `php tests/Smoke/expense_split_checks.php` for isolated regression and invariant checks.
 4. Run `php artisan test --filter=ExpenseAllocationTest` on a disposable test database for authenticated HTTP and persistence checks. The workflow uses in-memory SQLite.
 5. Inspect the `Expense allocation checks` Actions run for the exact commit being reviewed. A workflow file alone is not a passing result.
+
+## Verified result
+
+The implementation was merged in [PR #2](https://github.com/waleedmazhar64/evenupEZ-backend/pull/2). [The reviewed head passed CI](https://github.com/waleedmazhar64/evenupEZ-backend/actions/runs/40808061174) on PHP 8.2 and PHP 8.3: 234 isolated money checks and three authenticated API/database tests (12 assertions) per version. This verifies the focused allocation change, rather than the entire application.
 
 ## What this demonstrates
 
