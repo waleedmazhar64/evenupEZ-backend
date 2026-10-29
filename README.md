@@ -4,6 +4,9 @@ A personal full-stack application for recording shared expenses, managing groups
 
 ## Start with the engineering example
 
+The proposed implementation is in [PR #2](https://github.com/waleedmazhar64/evenupEZ-backend/pull/2). [CI passed on PHP 8.2 and 8.3 for commit 50f3c6e](https://github.com/waleedmazhar64/evenupEZ-backend/actions/runs/40807398091): 234 isolated money checks plus three authenticated HTTP/database tests (12 assertions) per PHP version.
+
+
 [Keeping every penny in an expense split](docs/expense-allocation-case-study.md) follows a real defect from reproduction to a proposed fix: splitting 10.00 three ways must total 10.00.
 
 | Review question | Code or evidence |
@@ -75,4 +78,3 @@ The workflow checks PHP 8.2 and 8.3. Inspect the run associated with the commit 
 ## Scope
 
 This is a personal project and an inspectable engineering sample. The allocation improvement does not establish production scale or whole-application security. Use synthetic demo data; review object-level access controls and receipt privacy before a public deployment. The [case study](docs/expense-allocation-case-study.md) records the implementation trade-offs and AI assistance.
-
