@@ -2,6 +2,15 @@
 
 EvenUpEZ is a Laravel-based backend for tracking group expenses and settlements. It is part of a full-stack expense-sharing application.
 
+## Engineering example: exact expense allocation
+
+A proposed improvement fixes a reproducible money bug: splitting 10.00 three ways previously stored 3.33 each. The change allocates integer minor units, preserves every penny, and adds input validation plus authenticated HTTP/database regression tests.
+
+- [Review the change and case study in PR #2](https://github.com/waleedmazhar64/evenupEZ-backend/pull/2).
+- [Inspect the successful PHP 8.2/8.3 checks for commit 50f3c6e](https://github.com/waleedmazhar64/evenupEZ-backend/actions/runs/40807398091).
+
+This is a proposed portfolio improvement prepared with AI assistance. The branch contains the implementation and focused tests; it does not establish whole-application security or historic production test coverage.
+
 ## Product capabilities
 
 - Group creation and member management
