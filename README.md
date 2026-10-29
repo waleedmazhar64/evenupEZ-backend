@@ -1,82 +1,57 @@
-# 💸 evenupEZ – Backend
+# EvenUpEZ — Shared Expense Management API
 
-**evenupEZ** is a Laravel-powered backend that makes splitting expenses effortless.  
-Create groups, add shared expenses, track who owes what, and settle payments — just like **Splitwise**, but simple and customizable for your needs.
+EvenUpEZ is a Laravel-based backend for tracking group expenses and settlements. It is part of a full-stack expense-sharing application.
 
+## Product capabilities
 
-## ✨ Features
+- Group creation and member management
+- Shared expense recording
+- Equal and custom expense splits
+- Balance tracking and settlement workflows
+- REST API consumed by the frontend
 
-✅ **User Authentication** – Secure registration & login  
-✅ **Group Management** – Create, join, and manage groups  
-✅ **Member Invitations** – Invite friends via email  
-✅ **Expense Tracking** – Split equally or by custom shares  
-✅ **Payment Settlement** – Mark balances as paid  
-✅ **Clean REST API** – Built for easy frontend integration  
+## Engineering focus
 
----
+Expense-sharing systems require consistent balance calculations, input validation, and careful handling of changes to shared expenses. This project can be discussed in interviews through its domain model, API design, authentication, and transaction integrity.
 
-## 🛠 Tech Stack
+## Technology
 
-| Component         | Technology |
-|------------------|-----------|
-| **Backend**      | [Laravel](https://laravel.com/) |
-| **Database**     | MySQL (or any Laravel-supported DB) |
-| **Auth**         | Laravel Passport / Sanctum |
-| **API**          | RESTful JSON |
-| **Deployment**   | Apache / Nginx |
+PHP, Laravel, relational database, and REST APIs. See `composer.json` and environment configuration for the repository's exact versions and installed dependencies.
 
----
+## Local setup
 
-## 📂 Project Structure
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-    
-    evenupEZ-backend/
-    ├── app/
-    │   ├── Http/
-    │   │   ├── Controllers/       # API Controllers
-    │   │   └── Middleware/        # Auth & Middleware
-    │   ├── Models/                # User, Group, Expense models
-    │   └── ...
-    ├── database/
-    │   ├── migrations/            # DB migrations
-    │   └── seeders/               # Test data
-    ├── routes/
-    │   └── api.php                # API routes
-    └── ...
+Set database credentials in `.env`, then:
 
+```bash
+php artisan migrate
+php artisan serve
+```
 
+Run automated tests, where configured, with:
 
-## ⚙️ Installation & Setup
-### Clone the repo
-    git clone https://github.com/your-username/evenupEZ-backend.git
-    cd evenupEZ-backend
+```bash
+php artisan test
+```
 
+Do not run database seeders against a non-disposable database without reviewing their effects.
 
-### Install dependencies
+## Repository map
 
-    composer install
+- `app/` — application domain and HTTP code
+- `routes/` — HTTP/API route definitions
+- `database/migrations/` — schema changes
+- `tests/` — test suite
 
+## Verification status
 
-### Environment setup
+This documentation describes the project's intended functionality and development setup. No performance benchmarks, passing test results, or production traffic metrics are claimed here without verification.
 
-    cp .env.example .env
+## Suggested technical discussion
 
-
-### Update .env with your DB credentials and other configs.
-
-    Generate app key
-
-    php artisan key:generate
-
-
-### Run migrations & seeders
-
-    php artisan migrate --seed
-
-
-### Start the server
-
- php artisan serve
-
-
-Backend will run at http://127.0.0.1:8000
+How group balances are represented, rounding and precision for currency, handling partial settlements, transactional consistency, authorization boundaries, and integration with a frontend.
